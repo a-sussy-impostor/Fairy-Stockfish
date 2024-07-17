@@ -144,6 +144,40 @@ Value Endgame<KXK>::operator()(const Position& pos) const {
 }
 
 
+/// Self-mate with KX vs KX.
+template<>
+Value Endgame<KXKX>::operator()(const Position& pos) const {
+
+  assert(!pos.checkers()); // Eval is never called when in check
+
+  // Stalemate detection with lone king
+  if (pos.side_to_move() == weakSide && !MoveList<LEGAL>(pos).size())
+      return VALUE_DRAW;
+
+  Square strongKing = pos.square<KING>(strongSide);
+  Square weakKing   = pos.square<KING>(weakSide);
+
+  Value result =  pos.non_pawn_material(strongSide) * int(VALUE_KNOWN_WIN) / int(VALUE_KNOWN_WIN + pos.non_pawn_material(strongSide))
+                - pos.non_pawn_material(weakSide)
+                + pos.count<PAWN>(weakSide) * PawnValueEg
+                + push_to_opposing_edge(relative_square(weakSide, strongKing, pos.max_rank()), pos) * 2
+                + push_close(strongKing, weakKing) * 2;
+
+  for (Bitboard b = pos.pieces(PAWN); b;)
+  {
+      Square s = pop_lsb(b);
+      result += (push_close(strongKing, s) + push_close(weakKing, s)) / 2;
+  }
+
+  if (!pos.count<PAWN>(weakSide))
+      result = VALUE_DRAW;
+  else if (pos.count<PAWN>(weakSide) == 1)
+      result = result / 2;
+
+  return strongSide == pos.side_to_move() ? result : -result;
+}
+
+
 /// Mate with KBN vs K. This is similar to KX vs K, but we have to drive the
 /// defending king towards a corner square that our bishop attacks.
 template<>

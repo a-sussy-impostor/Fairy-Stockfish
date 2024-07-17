@@ -38,6 +38,7 @@ enum EndgameCode {
   KNNK,  // KNN vs K
   KNNKP, // KNN vs KP
   KXK,   // Generic "mate lone king" eval
+  KXKX,  // Generic self-mate eval
   KBNK,  // KBN vs K
   KPK,   // KP vs K
   KRKP,  // KR vs KP

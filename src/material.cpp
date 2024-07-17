@@ -67,6 +67,8 @@ namespace {
   Endgame<KPsK>   ScaleKPsK[]   = { Endgame<KPsK>(WHITE),   Endgame<KPsK>(BLACK) };
   Endgame<KPKP>   ScaleKPKP[]   = { Endgame<KPKP>(WHITE),   Endgame<KPKP>(BLACK) };
 
+  Endgame<KXKX>  EvaluateKXKX[] = { Endgame<KXKX>(WHITE), Endgame<KXKX>(BLACK) };
+
   // Helper used to detect a given material distribution
   bool is_KFsPsK(const Position& pos, Color us) {
     return    (pos.promotion_piece_types(us) == piece_set(FERS))
@@ -78,6 +80,10 @@ namespace {
   bool is_KXK(const Position& pos, Color us) {
     return  !more_than_one(pos.pieces(~us))
           && pos.non_pawn_material(us) >= std::min(RookValueMg, 2 * SilverValueMg);
+  }
+
+  bool is_KXKX(const Position& pos, Color us) {
+    return  pos.non_pawn_material(~us) < QueenValueMg && pos.non_pawn_material(us) - pos.non_pawn_material(~us) > QueenValueMg;
   }
 
   bool is_KBPsK(const Position& pos, Color us) {
@@ -253,6 +259,16 @@ Entry* probe(const Position& pos) {
   if (!pos.count<PAWN>(BLACK) && npm_b - npm_w <= BishopValueMg)
       e->factor[BLACK] = uint8_t(npm_b <  RookValueMg && pos.count<ALL_PIECES>(BLACK) <= 2 ? SCALE_FACTOR_DRAW :
                                  npm_w <= BishopValueMg && pos.count<ALL_PIECES>(BLACK) <= 3 ? 4 : 14);
+  }
+
+  if (pos.checkmate_value() == VALUE_MATE)
+  {
+  for (Color c : { WHITE, BLACK })
+      if (is_KXKX(pos, c))
+      {
+          e->evaluationFunction = &EvaluateKXKX[c];
+          return e;
+      }
   }
 
   // Evaluate the material imbalance. We use PIECE_TYPE_NONE as a place holder

@@ -47,7 +47,8 @@ namespace {
     // https://en.wikipedia.org/wiki/Chess
     Variant* chess_variant() {
         Variant* v = chess_variant_base()->init();
-        v->nnueAlias = "nn-";
+        v->nnueAlias = "misere-";
+        v->checkmateValue = VALUE_MATE;
         return v;
     }
     // Chess960 aka Fischer random chess
