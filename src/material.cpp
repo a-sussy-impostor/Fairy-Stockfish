@@ -83,7 +83,7 @@ namespace {
   }
 
   bool is_KXKX(const Position& pos, Color us) {
-    return  pos.non_pawn_material(~us) < QueenValueMg && pos.non_pawn_material(us) - pos.non_pawn_material(~us) > QueenValueMg;
+    return  pos.non_pawn_material(us) - pos.non_pawn_material(~us) > QueenValueMg;
   }
 
   bool is_KBPsK(const Position& pos, Color us) {
